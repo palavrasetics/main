@@ -251,6 +251,7 @@
             <a href="#" onclick="openImageEditor()">Editor de Imagem</a>
             <a href="#" onclick="showPythonEmulator()">Emulador Python</a>
             <a href="#" onclick="showPage('https://palavrasetics.github.io/main/main.html')">Página 2</a>
+            <a href="#" onclick="showGame()">Jogar Parashooter</a>
             <a href="#" onclick="showPage('pagina3.html')">Página 3</a>
         </div>
     </div>
@@ -270,7 +271,8 @@
 
     <!-- Área de Exibição -->
     <div id="contentArea">
-        <iframe id="contentFrame"></iframe>
+        <iframe id="contentFrame" style="width: 100%; height: 100%; border: none; display: none;"></iframe>
+        <!-- <iframe id="contentFrame"></iframe> -->
 
         <!-- Editor de Imagem -->
         <div id="imageEditor">
@@ -316,6 +318,23 @@
             hideOthers('contentFrame');
         }
 
+        function showGame() {
+            var iframe = document.getElementById('contentFrame');
+            iframe.src = 'parashooter.html';
+            hideOthers('contentFrame');
+        }
+
+        function hideOthers(visibleElementId) {
+            var elements = ['contentFrame', 'imageEditor', 'calendarContainer', 'pythonEmulator'];
+            elements.forEach(function(id) {
+                if (id !== visibleElementId) {
+                    document.getElementById(id).style.display = 'none';
+                } else {
+                    document.getElementById(id).style.display = id === 'contentFrame' ? 'block' : 'flex';
+                }
+            });
+        }
+        
         function showPage(page) {
             var iframe = document.getElementById('contentFrame');
             iframe.src = page;
