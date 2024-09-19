@@ -2,7 +2,10 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <title>Layout com Banners Publicitários</title>
+    <title>Layout com Banners Publicitários e Funcionalidades Adicionais</title>
+    <!-- Inclua a biblioteca Skulpt -->
+    <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
     <style>
         body {
             margin: 0;
@@ -36,12 +39,13 @@
             grid-column: 2 / 3;
             background-color: #333;
             display: flex;
-            justify-content: center;
+            justify-content: flex-start; /* Alinhado à esquerda */
             align-items: center;
             height: 50px;
             position: relative;
             z-index: 2;
             box-shadow: 0 4px 2px -2px gray;
+            padding-left: 10px; /* Espaço à esquerda */
         }
 
         .banner-right {
@@ -67,6 +71,7 @@
             display: none;
             position: absolute;
             top: 50px;
+            left: 10px; /* Alinha o dropdown ao botão */
             background-color: #f9f9f9;
             min-width: 200px;
             box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
@@ -112,7 +117,7 @@
         }
 
         /* Estilos para o editor de imagem */
-        #imageEditor, #calendarContainer {
+        #imageEditor, #calendarContainer, #pythonEmulator {
             display: none;
             flex-direction: column;
             align-items: center;
@@ -173,6 +178,39 @@
             border: none;
             resize: none;
         }
+
+        /* Estilos para o Emulador Python */
+        #pythonEmulator {
+            display: none; /* Inicialmente oculto */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #pythonCode {
+            width: 80%;
+            height: 200px;
+            margin-bottom: 10px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        #pythonOutput {
+            width: 80%;
+            height: 200px;
+            background-color: #f1f1f1;
+            padding: 10px;
+            overflow: auto;
+            border: 1px solid #ccc;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
     </style>
 </head>
 <body>
@@ -197,6 +235,7 @@
             <a href="#" onclick="showExternalCalendar()">Calendário Externo</a>
             <a href="#" onclick="openImageEditor()">Editor de Imagem</a>
             <a href="#" onclick="showCalendar()">Calendário Interno</a>
+            <a href="#" onclick="showPythonEmulator()">Emulador Python</a>
         </div>
     </div>
 
@@ -223,11 +262,30 @@
         <div id="calendarContainer">
             <div id="calendar"></div>
         </div>
+
+        <!-- Emulador Python -->
+        <div id="pythonEmulator">
+            <textarea id="pythonCode" placeholder="Escreva seu código Python aqui"></textarea>
+            <button onclick="runPythonCode()">Executar Código</button>
+            <pre id="pythonOutput"></pre>
+        </div>
     </div>
 
     <!-- Banner Inferior -->
     <div class="banner-bottom">
-        Banner Inferior (Publicidade)
+        <!-- Google AdSense -->
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9732218228977895"
+            crossorigin="anonymous"></script>
+        <!-- Bloco de Anúncio -->
+        <ins class="adsbygoogle"
+            style="display:block"
+            data-ad-client="ca-pub-9732218228977895"
+            data-ad-slot="SEU_CÓDIGO_DE_BLOCO_DE_ANÚNCIO"
+            data-ad-format="auto"
+            data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
     </div>
 
     <script>
@@ -245,7 +303,7 @@
 
         function showExternalCalendar() {
             var iframe = document.getElementById('contentFrame');
-            iframe.src = 'https://agmoura.giae.com.pt/paa/calendario ';
+            iframe.src = 'https://agmoura.giae.com.pt/paa';
             hideOthers('contentFrame');
         }
 
@@ -258,13 +316,17 @@
             createCalendar(new Date().getFullYear(), new Date().getMonth() + 1);
         }
 
+        function showPythonEmulator() {
+            hideOthers('pythonEmulator');
+        }
+
         function hideOthers(visibleElementId) {
-            var elements = ['contentFrame', 'imageEditor', 'calendarContainer'];
+            var elements = ['contentFrame', 'imageEditor', 'calendarContainer', 'pythonEmulator'];
             elements.forEach(function(id) {
                 if (id !== visibleElementId) {
                     document.getElementById(id).style.display = 'none';
                 } else {
-                    document.getElementById(id).style.display = 'block';
+                    document.getElementById(id).style.display = id === 'contentFrame' ? 'block' : 'flex';
                 }
             });
         }
@@ -360,7 +422,38 @@
                 activeTextbox = null;
             }
         });
-    </script>
 
+        function runPythonCode() {
+            const code = document.getElementById('pythonCode').value;
+            const output = document.getElementById('pythonOutput');
+            output.innerText = ''; // Limpa o output anterior
+
+            // Configura o Skulpt
+            Sk.configure({
+                output: function(text) {
+                    output.innerText += text;
+                },
+                read: function(x) {
+                    if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+                        throw "Arquivo não encontrado: '" + x + "'";
+                    return Sk.builtinFiles["files"][x];
+                },
+            });
+
+            // Executa o código Python
+            let myPromise = Sk.misceval.asyncToPromise(function() {
+                return Sk.importMainWithBody("<stdin>", false, code, true);
+            });
+
+            myPromise.then(
+                function(mod) {
+                    console.log('Execução bem-sucedida');
+                },
+                function(err) {
+                    output.innerText += '\nErro: ' + err.toString();
+                }
+            );
+        }
+    </script>
 </body>
 </html>
