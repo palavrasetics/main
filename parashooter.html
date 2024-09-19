@@ -1,0 +1,158 @@
+<!-- parashooter.html -->
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Parashooter Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: black;
+            overflow: hidden;
+        }
+        #gameCanvas {
+            display: block;
+            margin: 0 auto;
+            background-color: black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="640" height="480"></canvas>
+
+    <script>
+        // Variáveis do jogo
+        var canvas = document.getElementById('gameCanvas');
+        var ctx = canvas.getContext('2d');
+        var base, bullets = [], enemies = [];
+        var keys = {};
+        var gameInterval;
+
+        // Inicializa o jogo
+        function initGame() {
+            base = { x: canvas.width / 2 - 25, y: canvas.height - 60, width: 50, height: 50 };
+            bullets = [];
+            enemies = [];
+            keys = {};
+
+            // Event listeners
+            document.addEventListener('keydown', keyDownHandler);
+            document.addEventListener('keyup', keyUpHandler);
+
+            // Inicia o loop do jogo
+            clearInterval(gameInterval);
+            gameInterval = setInterval(gameLoop, 20);
+        }
+
+        function keyDownHandler(e) {
+            keys[e.key] = true;
+            // Previne a rolagem da página ao usar as teclas de seta
+            if (['ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+                e.preventDefault();
+            }
+        }
+
+        function keyUpHandler(e) {
+            keys[e.key] = false;
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+        }
+
+        function update() {
+            // Movimenta a base
+            if (keys['ArrowLeft'] && base.x > 0) {
+                base.x -= 5;
+            }
+            if (keys['ArrowRight'] && base.x + base.width < canvas.width) {
+                base.x += 5;
+            }
+            // Atira
+            if (keys[' ']) {
+                shoot();
+            }
+
+            // Atualiza balas
+            bullets.forEach(function(bullet, index) {
+                bullet.y -= 7;
+                if (bullet.y < 0) {
+                    bullets.splice(index, 1);
+                }
+            });
+
+            // Cria inimigos
+            if (Math.random() < 0.02) {
+                var enemyX = Math.random() * (canvas.width - 30);
+                enemies.push({ x: enemyX, y: -30, width: 30, height: 30 });
+            }
+
+            // Atualiza inimigos
+            enemies.forEach(function(enemy, index) {
+                enemy.y += 2;
+                if (enemy.y > canvas.height) {
+                    enemies.splice(index, 1);
+                }
+            });
+
+            // Verifica colisões
+            bullets.forEach(function(bullet, bIndex) {
+                enemies.forEach(function(enemy, eIndex) {
+                    if (isColliding(bullet, enemy)) {
+                        bullets.splice(bIndex, 1);
+                        enemies.splice(eIndex, 1);
+                    }
+                });
+            });
+        }
+
+        function draw() {
+            // Limpa o canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Desenha a base
+            ctx.fillStyle = 'blue';
+            ctx.fillRect(base.x, base.y, base.width, base.height);
+
+            // Desenha as balas
+            ctx.fillStyle = 'yellow';
+            bullets.forEach(function(bullet) {
+                ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+            });
+
+            // Desenha os inimigos
+            ctx.fillStyle = 'red';
+            enemies.forEach(function(enemy) {
+                ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+            });
+        }
+
+        function shoot() {
+            if (!keys['canShoot']) {
+                bullets.push({
+                    x: base.x + base.width / 2 - 2.5,
+                    y: base.y,
+                    width: 5,
+                    height: 10
+                });
+                keys['canShoot'] = true;
+                setTimeout(function() {
+                    keys['canShoot'] = false;
+                }, 300); // Taxa de disparo
+            }
+        }
+
+        function isColliding(a, b) {
+            return a.x < b.x + b.width &&
+                   a.x + a.width > b.x &&
+                   a.y < b.y + b.height &&
+                   a.y + a.height > b.y;
+        }
+
+        // Inicia o jogo quando a página é carregada
+        window.onload = initGame;
+    </script>
+</body>
+</html>
