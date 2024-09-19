@@ -174,7 +174,44 @@
             border: none;
             resize: none;
         }
+
+        /* Estilos para o Emulador Python */
+        #pythonEmulator {
+            display: none; /* Inicialmente oculto */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #pythonCode {
+            width: 80%;
+            height: 200px;
+            margin-bottom: 10px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        #pythonOutput {
+            width: 80%;
+            height: 200px;
+            background-color: #f1f1f1;
+            padding: 10px;
+            overflow: auto;
+            border: 1px solid #ccc;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    
     </style>
+    
+    <!-- Inclua a biblioteca Skulpt -->
+    <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
 </head>
 <body>
 
@@ -209,11 +246,12 @@
         <button class="dropbtn">Menu ▼</button>
         <div class="dropdown-content">
             <a href="#" onclick="showAGMoura()">AG Moura</a>
+            <a href="#" onclick="showExternalCalendar()">Calendário Externo</a>
+            <a href="#" onclick="showCalendar()">Calendário Interno</a>
+            <a href="#" onclick="openImageEditor()">Editor de Imagem</a>
+            <a href="#" onclick="showPythonEmulator()">Emulador Python</a>
             <a href="#" onclick="showPage('pagina2.html')">Página 2</a>
             <a href="#" onclick="showPage('pagina3.html')">Página 3</a>
-            <a href="#" onclick="showExternalCalendar()">Calendário Externo</a>
-            <a href="#" onclick="openImageEditor()">Editor de Imagem</a>
-            <a href="#" onclick="showCalendar()">Calendário Interno</a>
         </div>
     </div>
 
@@ -248,6 +286,14 @@
         <div id="calendarContainer">
             <div id="calendar"></div>
         </div>
+
+        <!-- Emulador Python -->
+        <div id="pythonEmulator">
+            <textarea id="pythonCode" placeholder="Escreva seu código Python aqui"></textarea>
+            <button onclick="runPythonCode()">Executar Código</button>
+            <pre id="pythonOutput"></pre>
+        </div>
+        
     </div>
 
     <!-- Banner Inferior -->
@@ -393,6 +439,59 @@
                 activeTextbox = null;
             }
         });
+
+        function showPythonEmulator() {
+    hideOthers('pythonEmulator');
+}
+
+function runPythonCode() {
+    const code = document.getElementById('pythonCode').value;
+    const output = document.getElementById('pythonOutput');
+    output.innerText = ''; // Limpa o output anterior
+
+    // Configura o Skulpt
+    Sk.configure({
+        output: function(text) {
+            output.innerText += text;
+        },
+        read: function(x) {
+            if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+                throw "Arquivo não encontrado: '" + x + "'";
+            return Sk.builtinFiles["files"][x];
+        },
+    });
+
+    // Executa o código Python
+    (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = 'pythonOutput';
+
+    let myPromise = Sk.misceval.asyncToPromise(function() {
+        return Sk.importMainWithBody("<stdin>", false, code, true);
+    });
+
+    myPromise.then(
+        function(mod) {
+            console.log('Execução bem-sucedida');
+        },
+        function(err) {
+            output.innerText += '\nErro: ' + err.toString();
+        }
+    );
+}
+
+function hideOthers(visibleElementId) {
+    var elements = ['contentFrame', 'imageEditor', 'calendarContainer', 'pythonEmulator'];
+    elements.forEach(function(id) {
+        if (id !== visibleElementId) {
+            document.getElementById(id).style.display = 'none';
+        } else {
+            document.getElementById(id).style.display = 'flex'; // Usando 'flex' para alinhamento
+        }
+    });
+}
+
+
+
+        
     </script>
 
 </body>
