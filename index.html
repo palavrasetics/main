@@ -36,8 +36,7 @@
             grid-column: 2 / 3;
             background-color: #333;
             display: flex;
-            /* justify-content: center; */
-            justify-content: flex-start; /* Altera de center para flex-start */
+            justify-content: flex-start;
             align-items: center;
             height: 50px;
             position: relative;
@@ -112,7 +111,6 @@
             box-shadow: 0 -4px 2px -2px gray;
         }
 
-        /* Estilos para o editor de imagem */
         #imageEditor, #calendarContainer {
             display: none;
             flex-direction: column;
@@ -135,7 +133,6 @@
             margin-top: 10px;
         }
 
-        /* Estilos para o calendário */
         #calendar {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -175,9 +172,8 @@
             resize: none;
         }
 
-        /* Estilos para o Emulador Python */
         #pythonEmulator {
-            display: none; /* Inicialmente oculto */
+            display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -186,6 +182,7 @@
             padding: 20px;
             box-sizing: border-box;
         }
+
         #pythonCode {
             width: 80%;
             height: 200px;
@@ -206,12 +203,7 @@
             white-space: pre-wrap;
             word-wrap: break-word;
         }
-    
     </style>
-    
-    <!-- Inclua a biblioteca Skulpt -->
-    <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
 </head>
 <body>
 
@@ -271,8 +263,7 @@
 
     <!-- Área de Exibição -->
     <div id="contentArea">
-        <iframe id="contentFrame" style="width: 100%; height: 100%; border: none; display: none;"></iframe>
-        <!-- <iframe id="contentFrame"></iframe> -->
+        <iframe id="contentFrame"></iframe>
 
         <!-- Editor de Imagem -->
         <div id="imageEditor">
@@ -295,7 +286,6 @@
             <button onclick="runPythonCode()">Executar Código</button>
             <pre id="pythonOutput"></pre>
         </div>
-        
     </div>
 
     <!-- Banner Inferior -->
@@ -312,6 +302,16 @@
     </div>
 
     <script>
+        function hideOthers(visibleElementId) {
+            var elements = ['contentFrame', 'imageEditor', 'calendarContainer', 'pythonEmulator'];
+            elements.forEach(function(id) {
+                var elem = document.getElementById(id);
+                if (elem) {
+                    elem.style.display = (id === visibleElementId) ? (id === 'contentFrame' ? 'block' : 'flex') : 'none';
+                }
+            });
+        }
+
         function showAGMoura() {
             var iframe = document.getElementById('contentFrame');
             iframe.src = 'https://www.agmoura.pt';
@@ -324,17 +324,6 @@
             hideOthers('contentFrame');
         }
 
-        function hideOthers(visibleElementId) {
-            var elements = ['contentFrame', 'imageEditor', 'calendarContainer', 'pythonEmulator'];
-            elements.forEach(function(id) {
-                if (id !== visibleElementId) {
-                    document.getElementById(id).style.display = 'none';
-                } else {
-                    document.getElementById(id).style.display = id === 'contentFrame' ? 'block' : 'flex';
-                }
-            });
-        }
-        
         function showPage(page) {
             var iframe = document.getElementById('contentFrame');
             iframe.src = page;
@@ -343,7 +332,7 @@
 
         function showExternalCalendar() {
             var iframe = document.getElementById('contentFrame');
-            iframe.src = 'https://agmoura.giae.com.pt/paa/calendario ';
+            iframe.src = 'https://agmoura.giae.com.pt/paa/calendario';
             hideOthers('contentFrame');
         }
 
@@ -356,15 +345,8 @@
             createCalendar(new Date().getFullYear(), new Date().getMonth() + 1);
         }
 
-        function hideOthers(visibleElementId) {
-            var elements = ['contentFrame', 'imageEditor', 'calendarContainer'];
-            elements.forEach(function(id) {
-                if (id !== visibleElementId) {
-                    document.getElementById(id).style.display = 'none';
-                } else {
-                    document.getElementById(id).style.display = 'block';
-                }
-            });
+        function showPythonEmulator() {
+            hideOthers('pythonEmulator');
         }
 
         function pasteImage() {
@@ -395,7 +377,6 @@
             link.click();
         }
 
-        // Código do calendário interativo
         let activeTextbox = null;
 
         function createCalendar(year, month) {
@@ -404,7 +385,6 @@
             const calendar = document.getElementById('calendar');
             calendar.innerHTML = '';
 
-            // Cabeçalho dos dias da semana
             const weekDays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
             weekDays.forEach(day => {
                 const dayHeader = document.createElement('div');
@@ -459,58 +439,35 @@
             }
         });
 
-        function showPythonEmulator() {
-    hideOthers('pythonEmulator');
-}
+        function runPythonCode() {
+            const code = document.getElementById('pythonCode').value;
+            const output = document.getElementById('pythonOutput');
+            output.innerText = '';
 
-function runPythonCode() {
-    const code = document.getElementById('pythonCode').value;
-    const output = document.getElementById('pythonOutput');
-    output.innerText = ''; // Limpa o output anterior
+            Sk.configure({
+                output: function(text) {
+                    output.innerText += text;
+                },
+                read: function(x) {
+                    if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+                        throw "Arquivo não encontrado: '" + x + "'";
+                    return Sk.builtinFiles["files"][x];
+                },
+            });
 
-    // Configura o Skulpt
-    Sk.configure({
-        output: function(text) {
-            output.innerText += text;
-        },
-        read: function(x) {
-            if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
-                throw "Arquivo não encontrado: '" + x + "'";
-            return Sk.builtinFiles["files"][x];
-        },
-    });
+            let myPromise = Sk.misceval.asyncToPromise(function() {
+                return Sk.importMainWithBody("<stdin>", false, code, true);
+            });
 
-    // Executa o código Python
-    (Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = 'pythonOutput';
-
-    let myPromise = Sk.misceval.asyncToPromise(function() {
-        return Sk.importMainWithBody("<stdin>", false, code, true);
-    });
-
-    myPromise.then(
-        function(mod) {
-            console.log('Execução bem-sucedida');
-        },
-        function(err) {
-            output.innerText += '\nErro: ' + err.toString();
+            myPromise.then(
+                function(mod) {
+                    console.log('Execução bem-sucedida');
+                },
+                function(err) {
+                    output.innerText += '\nErro: ' + err.toString();
+                }
+            );
         }
-    );
-}
-
-function hideOthers(visibleElementId) {
-    var elements = ['contentFrame', 'imageEditor', 'calendarContainer', 'pythonEmulator'];
-    elements.forEach(function(id) {
-        if (id !== visibleElementId) {
-            document.getElementById(id).style.display = 'none';
-        } else {
-            document.getElementById(id).style.display = 'flex'; // Usando 'flex' para alinhamento
-        }
-    });
-}
-
-
-
-        
     </script>
 
 </body>
