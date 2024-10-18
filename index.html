@@ -242,6 +242,7 @@
             <a href="#" onclick="showCalendar()">Calendário Interno</a>
             <a href="#" onclick="openImageEditor()">Editor de Imagem</a>
             <a href="#" onclick="showPythonEmulator()">Emulador Python</a>
+            <a href="#" onclick="showHTMLEditor()">Editor HTML</a>
             <a href="#" onclick="showPage('https://palavrasetics.github.io/main/main.html')">Página 2</a>
             <a href="#" onclick="showPage('https://chatgpt.com/')">GPT</a>
             <a href="#" onclick="showPage('https://chatgpt.com/')">GPT</a>
@@ -289,6 +290,14 @@
             <pre id="pythonOutput"></pre>
         </div>
     </div>
+
+    <div id="htmlEditor" style="display:none;">
+    <textarea id="htmlCode" placeholder="Escreva seu código HTML aqui"></textarea>
+    <button onclick="executeHTML()">Executar HTML</button>
+    <button onclick="saveHTMLFile()">Exportar como HTML</button>
+    <iframe id="htmlOutput" style="width: 100%; height: 300px; border: 1px solid #ccc;"></iframe>
+</div>
+
 
     <!-- Banner Inferior -->
     <div class="banner-bottom">
@@ -440,6 +449,35 @@
                 activeTextbox = null;
             }
         });
+
+        function showHTMLEditor() {
+    hideOthers('htmlEditor');
+}
+
+function executeHTML() {
+    const code = document.getElementById('htmlCode').value;  // Pega o código do editor
+    const iframe = document.getElementById('htmlOutput');  // Iframe para exibir o resultado
+    iframe.srcdoc = code;  // Coloca o código dentro do iframe
+}
+
+function saveHTMLFile() {
+    const code = document.getElementById('htmlCode').value;  // Pega o código do editor
+    const blob = new Blob([code], { type: 'text/html' });  // Cria o arquivo
+    const link = document.createElement('a');  // Cria um link para baixar
+    link.href = URL.createObjectURL(blob);  // Cria o URL para o blob
+    link.download = 'codigo.html';  // Nome do arquivo
+    link.click();  // Simula o clique para baixar o arquivo
+}
+
+function hideOthers(visibleElementId) {
+    var elements = ['htmlEditor', 'pythonEmulator'];  // Adicione outros IDs se necessário
+    elements.forEach(function(id) {
+        var elem = document.getElementById(id);
+        if (elem) {
+            elem.style.display = (id === visibleElementId) ? 'block' : 'none';
+        }
+    });
+}
 
         function savePythonFile() {
     const code = document.getElementById('pythonCode').value;  // Obtém o código do textarea de Python
