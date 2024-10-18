@@ -285,6 +285,7 @@
         <div id="pythonEmulator">
             <textarea id="pythonCode" placeholder="Escreva seu código Python aqui"></textarea>
             <button onclick="runPythonCode()">Executar Código</button>
+            <button onclick="savePythonFile()">Exportar como Python</button>
             <pre id="pythonOutput"></pre>
         </div>
     </div>
@@ -439,6 +440,15 @@
                 activeTextbox = null;
             }
         });
+
+        function savePythonFile() {
+    const code = document.getElementById('pythonCode').value;  // Obtém o código do textarea de Python
+    const blob = new Blob([code], { type: 'text/x-python' });  // Cria um blob com o conteúdo
+    const link = document.createElement('a');  // Cria um link para download
+    link.href = URL.createObjectURL(blob);  // Define a URL com o blob
+    link.download = 'codigo.py';  // Define o nome do arquivo
+    link.click();  // Simula o clique no link para download
+}
 
         function runPythonCode() {
             const code = document.getElementById('pythonCode').value;
