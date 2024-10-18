@@ -291,14 +291,16 @@
         </div>
     </div>
 
-    <div id="htmlEditor" style="display:none;">
-    <textarea id="htmlCode" placeholder="Escreva seu código HTML aqui"></textarea>
-    <button onclick="executeHTML()">Executar HTML</button>
-    <button onclick="saveHTMLFile()">Exportar como HTML</button>
-    <iframe id="htmlOutput" style="width: 100%; height: 300px; border: 1px solid #ccc;"></iframe>
-</div>
-
-
+    <!-- Editor HTML -->
+    <div id="htmlEditor">
+        <textarea id="htmlCode" placeholder="Escreva seu código HTML aqui"></textarea>
+        <div class="editor-buttons">
+            <button onclick="executeHTML()">Executar HTML</button>
+            <button onclick="saveHTMLFile()">Exportar como HTML</button>
+        </div>
+        <iframe id="htmlOutput"></iframe>
+    </div>
+    
     <!-- Banner Inferior -->
     <div class="banner-bottom">
         <!-- Banner Inferior (Publicidade) -->
